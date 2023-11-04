@@ -179,9 +179,6 @@
     <Content Include="Icons\mouse_gray.svg" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Expression.Blend.Sdk.WPF">
-      <Version>1.0.1</Version>
-    </PackageReference>
     <PackageReference Include="FMUtils.KeyboardHook">
       <Version>1.0.140.2145</Version>
     </PackageReference>
