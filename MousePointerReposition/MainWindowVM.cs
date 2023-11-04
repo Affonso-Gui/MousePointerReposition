@@ -398,6 +398,8 @@ namespace MousePointerReposition
                     || e.Key == Keys.Right && e.isWinPressed) // with or without shift //&& e.isShiftPressed)
                 {
                     TriggerMousePositioning();
+                    // Don't wait until the key is released
+                    ExecuteMousePositioning();
                 }
             }
 
