@@ -56,6 +56,15 @@ namespace MousePointerReposition.Helper
             get { return ReadRegValue<int>(nameof(DisableManualCursorReposition)) == 1; }
             set { WriteRegValue<int>(nameof(DisableManualCursorReposition), value ? 1 : 0); }
         }
+
+        /// <summary>
+        /// Disable Multi-Monitor Focus Mode Toggle
+        /// </summary>
+        public bool DisableFocusToggle
+        {
+            get { return ReadRegValue<int>(nameof(DisableFocusToggle)) == 1; }
+            set { WriteRegValue<int>(nameof(DisableFocusToggle), value ? 1 : 0); }
+        }
         #endregion public properties
 
 

@@ -35,6 +35,7 @@ namespace MousePointerReposition
         #region fields
 
         private Vanara.PInvoke.RECT foreGroundWindowRectStart;
+        private Dictionary<Vanara.PInvoke.HWND, Vanara.PInvoke.RECT> windowSizeStart;
         private WindowState windowState;
         private bool showInTaskbar;
         private bool autostart;
@@ -45,6 +46,7 @@ namespace MousePointerReposition
         private bool? disableAltTab;
         private bool? disableWinLeftRight;
         private bool? disableManualReposition;
+        private bool? disableFocusToggle;
         private bool autoStartDisabled;
 
         public event PropertyChangedEventHandler PropertyChanged;
@@ -262,6 +264,24 @@ namespace MousePointerReposition
             }
         }
 
+        /// <summary>
+        /// Disable Multi-Monitor Focus Mode Toggle
+        /// </summary>
+        public bool DisableFocusToggle
+        {
+            get
+            {
+                if (!disableFocusToggle.HasValue)
+                    disableFocusToggle = SettingsHelper.Instance.DisableFocusToggle;
+                return disableFocusToggle ?? false;
+            }
+            set
+            {
+                disableFocusToggle = value;
+                SettingsHelper.Instance.DisableFocusToggle = value;
+                OnPropertyChanged(nameof(DisableFocusToggle));
+            }
+        }
         #endregion public properties
 
 
@@ -279,6 +299,9 @@ namespace MousePointerReposition
             RepositioningTimer = new System.Timers.Timer(200);
             RepositioningTimer.Elapsed += RepositioningTimer_Elapsed;
             RepositioningTimer.AutoReset = false;
+
+            // dict
+            windowSizeStart = new Dictionary<Vanara.PInvoke.HWND, Vanara.PInvoke.RECT>();
 
             // setup keyboard hook
             KeyboardHook = new Hook("Global Keyboard Hook");
@@ -412,6 +435,14 @@ namespace MousePointerReposition
                 }
             }
 
+            if (!DisableFocusToggle)
+            {
+                if (e.Key == Keys.F11 && e.isAltPressed)
+                {
+                    ToggleMultiMonitorFocusMode();
+                }
+            }
+
             if (!DisableManuelPositioning)
             {
                 if (e.isCtrlPressed && e.Key == Keys.None)
@@ -470,6 +501,30 @@ namespace MousePointerReposition
             }
         }
 
+        private void ToggleMultiMonitorFocusMode()
+        {
+            var foregroundWindowHandle = Vanara.PInvoke.User32.GetForegroundWindow();
+
+            if (windowSizeStart.ContainsKey(foregroundWindowHandle))
+            {
+                // Already has entry. Delete entry and return to previous size.
+                var rect = windowSizeStart[foregroundWindowHandle];
+                windowSizeStart.Remove(foregroundWindowHandle);
+                Vanara.PInvoke.User32.MoveWindow(foregroundWindowHandle, rect.left, rect.top, rect.Size.Width, rect.Size.Height, true);
+                return;
+            }
+
+            // No entry found. Store current size and then maximize.
+            var currentRect = new Vanara.PInvoke.RECT();
+            Vanara.PInvoke.User32.GetWindowRect(foregroundWindowHandle, out currentRect);
+            windowSizeStart.Add(foregroundWindowHandle, currentRect);
+
+            int left = Vanara.PInvoke.User32.GetSystemMetrics(Vanara.PInvoke.User32.SystemMetric.SM_XVIRTUALSCREEN);
+            int top = Vanara.PInvoke.User32.GetSystemMetrics(Vanara.PInvoke.User32.SystemMetric.SM_YVIRTUALSCREEN);
+            int width = Vanara.PInvoke.User32.GetSystemMetrics(Vanara.PInvoke.User32.SystemMetric.SM_CXVIRTUALSCREEN);
+            int height = Vanara.PInvoke.User32.GetSystemMetrics(Vanara.PInvoke.User32.SystemMetric.SM_CYVIRTUALSCREEN);
+            Vanara.PInvoke.User32.MoveWindow(foregroundWindowHandle, left, top, width, height, true);
+        }
 
         /// <summary>
         /// Called when key combination for cursor repositioning is detected.

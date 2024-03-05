@@ -107,6 +107,14 @@
                                         Header="Disable 2x CTRL"
                                         IsOn="{Binding DisableManuelPositioning}"/>
                     <TextBlock Grid.Row="3" Grid.Column="1" Margin="20 5 5 5" TextWrapping="Wrap" Text="Do not move mouse to center of active application window when pressing Ctrl key twice." />
+
+                    <metro:ToggleSwitch Grid.Row="4"
+                                        Grid.Column="0"
+                                        Margin="5"
+                                        Header="Disable ALT+F11"
+                                        IsOn="{Binding DisableFocusToggle}"/>
+                    <TextBlock Grid.Row="4" Grid.Column="1" Margin="20 5 5 5" TextWrapping="Wrap" Text="Do not toggle multi-monitor focus mode with Alt+F11 key combination." />
+
                 </Grid>
             </TabItem>
             <TabItem Header="Credits">
